@@ -141,7 +141,7 @@ clearBtn.addEventListener("click", clearAllLogs);
         left.innerHTML = `<div class='time'>${t}</div><div style='font-size:13px;color:var(--muted)'>LamoBriv</div>`;
         const right = document.createElement('div');
         if (takenMap[t]){
-          right.innerHTML = `<span class='taken'>Taken by ${takenMap[t].user} at ${new Date(takenMap[t].ts).toLocaleTimeString()}</span>`;
+          right.innerHTML = `<span class='taken'>Given by ${takenMap[t].user} at ${new Date(takenMap[t].ts).toLocaleTimeString()}</span>`;
         } else {
           const btn = document.createElement('button');
           btn.className='btn';
