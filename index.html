@@ -100,6 +100,8 @@
       getFirestore,
       collection,
       addDoc,
+      getDocs,
+      writeBatch,
       onSnapshot,
       query,
       orderBy,
@@ -166,7 +168,7 @@ clearBtn.addEventListener("click", clearAllLogs);
 async function clearAllLogs() {
     if (!confirm("Are you sure you want to delete ALL medication entries?")) return;
 
-    const snapshot = await getDocs(collection(db, "medlog"));
+    const snapshot = await getDocs(collection(db, "events"));
 
     const batch = writeBatch(db);
     snapshot.forEach((doc) => batch.delete(doc.ref));
