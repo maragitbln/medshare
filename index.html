@@ -74,7 +74,20 @@
         </div>
         <div style="margin-top:8px;color:var(--muted);font-size:13px">You (or your Shortcut) can call: <code>/?user=Ben&med=Elvanse&time=08:00</code></div>
       </div>
-
+<button id="clearDataBtn" class="btn-clear">
+    Clear All Logged Entries
+</button>
+      <style>
+    .btn-clear {
+        background-color: #c62828;
+        color: white;
+        padding: 10px 16px;
+        border-radius: 8px;
+        margin-top: 20px;
+        border: none;
+        font-size: 16px;
+    }
+</style>
       <footer>Tip: Add this page to your Home Screen (Share → Add to Home Screen) for a native-like experience.</footer>
     </main>
   </div>
@@ -112,6 +125,9 @@
     const logEl = document.getElementById('log');
     const liveStatus = document.getElementById('liveStatus');
 
+const clearBtn = document.getElementById("clearDataBtn");
+clearBtn.addEventListener("click", clearAllLogs);
+    
     const defaultSchedule = ["06:30","17:30"];
 
     function renderSchedule(takenMap = {}){
@@ -147,7 +163,19 @@
         alert(`${med} logged for ${user} at ${new Date().toLocaleTimeString()}`);
       }
     }
+async function clearAllLogs() {
+    if (!confirm("Are you sure you want to delete ALL medication entries?")) return;
 
+    const snapshot = await getDocs(collection(db, "medlog"));
+
+    const batch = writeBatch(db);
+    snapshot.forEach((doc) => batch.delete(doc.ref));
+
+    await batch.commit();
+
+    renderLogs(); // refresh UI
+    alert("All data cleared.");
+}
     async function quickLog(user, med, scheduledTime){
       try{
         await addDoc(collection(db, 'events'), {
