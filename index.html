@@ -1,235 +1,80 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MedShare — Medication Dashboard</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MedShare — Medication Dashboard</title>
 
-  <!-- PWA manifest -->
-  <link rel="manifest" href="/manifest.json">
-  <!-- Simple apple touch icon embedded as data URI to appear when pinned -->
-  <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABmElEQVR4nO2Yv0sDQRSGv2cQ0kKqgqKqgqKgqKqCq0kqCqkqKgqKgq0oKq4gqKqKgq/4Xc2bmk3u7OzJmZ3Z2b3nHnOfc7szM7M7s2g2g0aB6g9wA3oA3oA7wB3oA3oA7wI3oA3oA7wB3qA3oQ3oA7gD3oA3oA7wB3oA3qA3oA3oA7wB3oA3oA7wB3qA3oA7wB3oA3oA7wB3oA3oA7wB3qA3oA7wB3oA3oA7wB3oA3oA7wB3qA3oA7wB3oA3qA3oA7wB3oA3oA7wB3oA3oA7wB3qA3oA7wB3oA3oA7wB3oA3qA3oA7wB3oA3oA7wB3oA3oA7wB3qA3oA7wB3oA3oA7wB3oA3gO7j4rS3sue+2p5kGm0s0zvYQxv0B0U6I3wB3oA7wB3oA3oA7wB3oA3oA7wB3oA3oA7wB3qA3oA7wB3oA3oA7wB3oA3oA7wB0r4D3cJ9d5sdwAAAABJRU5ErkJggg==">
 
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+<!-- PWA manifest (optional). Keep file 'manifest.json' in the same repo root if you want PWA features -->
+<link rel="manifest" href="manifest.json">
+<!-- Simple apple touch icon embedded as data URI to appear when pinned -->
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABmElEQVR4nO2Yv0sDQRSGv2cQ0kKqgqKqgqKgqKqCq0kqCqkqKgqKgq0oKq4gqKqKgq/4Xc2bmk3u7OzJmZ3Z2b3nHnOfc7szM7M7s2g2g0aB6g9wA3oA3oA7wB3oA3oA7wI3oA3oA7wB3qA3oQ3oA7gD3oA3oA7wB3oA3qA3oA3oA7wB3oA3oA7wB3qA3oA7wB3oA3oA7wB3oA3oA7wB3qA3oA7wB3oA3oA7wB3oA3oA7wB3qA3oA7wB3oA3qA3oA7wB3oA3oA7wB3oA3oA7wB3qA3oA7wB3oA3oA7wB3oA3qA3oA7wB3oA3oA7wB3oA3oA7wB3qA3oA7wB3oA3oA7wB3oA3gO7j4rS3sue+2p5kGm0s0zvYQxv0B0U6I3wB3oA7wB3oA3oA7wB3oA3oA7wB3oA3oA7wB3qA3oA7wB3oA3oA7wB3oA3oA7wB0r4D3cJ9d5sdwAAAABJRU5ErkJggg==">
 
-  <style>
-    :root{--bg:#0f1724;--card:#0b1220;--muted:#9aa6b2;--accent:#6ee7b7}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#071126 0%,#0b1220 100%);color:#e6eef6}
-    .app{max-width:820px;margin:14px auto;padding:16px}
-    header{display:flex;align-items:center;gap:12px}
-    .logo{width:56px;height:56px;background:linear-gradient(135deg,#22c1c3,#6ee7b7);border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#04202a}
-    h1{margin:0;font-size:20px}
-    p.lead{margin:4px 0 14px;color:var(--muted)}
-    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
-    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(2,6,23,0.6)}
-    .med-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
-    .time{font-weight:600}
-    .taken{opacity:0.5}
-    button.btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:8px;color:var(--accent);cursor:pointer}
-    .log{margin-top:12px;max-height:260px;overflow:auto}
-    .log-item{padding:8px;border-bottom:1px dashed rgba(255,255,255,0.02);font-size:14px}
-    footer{color:var(--muted);font-size:13px;margin-top:14px}
-    .status-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px}
-    .status-ok{background:#6ee7b7}
-    .status-warn{background:#fbbf24}
-  </style>
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+
+<style>
+:root{--bg:#0f1724;--card:#0b1220;--muted:#9aa6b2;--accent:#6ee7b7}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#071126 0%,#0b1220 100%);color:#e6eef6}
+.app{max-width:820px;margin:14px auto;padding:16px}
+header{display:flex;align-items:center;gap:12px}
+.logo{width:56px;height:56px;background:linear-gradient(135deg,#22c1c3,#6ee7b7);border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#04202a}
+h1{margin:0;font-size:20px}
+p.lead{margin:4px 0 14px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(2,6,23,0.6)}
+.med-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.time{font-weight:600}
+.taken{opacity:0.5}
+button.btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:8px;color:var(--accent);cursor:pointer}
+.log{margin-top:12px;max-height:260px;overflow:auto}
+.log-item{padding:8px;border-bottom:1px dashed rgba(255,255,255,0.02);font-size:14px}
+footer{color:var(--muted);font-size:13px;margin-top:14px}
+.status-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px}
+.status-ok{background:#6ee7b7}
+.status-warn{background:#fbbf24}
+</style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <div class="logo">MS</div>
-      <div>
-        <h1>MedShare</h1>
-        <p class="lead">Shared medication dashboard — quick logging from iPhone Shortcuts</p>
-      </div>
-    </header>
-
-    <main style="margin-top:12px">
-      <div class="cards">
-        <div class="card">
-          <h3>Today's schedule</h3>
-          <div id="schedule">
-            <!-- populated by JS -->
-          </div>
-          <div style="margin-top:8px;text-align:right"><button class="btn" id="refreshBtn">Refresh</button></div>
-        </div>
-
-        <div class="card">
-          <h3>Live status</h3>
-          <div id="liveStatus">
-            <div style="font-size:13px;color:var(--muted);">Listening for events...</div>
-          </div>
-          <div class="log" id="log"></div>
-        </div>
-      </div>
-
-      <div style="margin-top:12px" class="card">
-        <h3>Manual actions</h3>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input id="userName" placeholder="Your name" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit">
-          <input id="medName" placeholder="Medication name" style="width:220px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit">
-          <input id="scheduledTime" placeholder="Scheduled time (HH:MM)" style="width:120px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit">
-          <button class="btn" id="markBtn">Mark taken</button>
-        </div>
-        <div style="margin-top:8px;color:var(--muted);font-size:13px">You (or your Shortcut) can call: <code>/?user=Ben&med=Elvanse&time=08:00</code></div>
-      </div>
-
-      <footer>Tip: Add this page to your Home Screen (Share → Add to Home Screen) for a native-like experience.</footer>
-    </main>
-  </div>
-
-  <!-- Firebase (modular) CDN imports -->
-  <script type="module">
-    // --------- REPLACE the firebaseConfig object below with your project's config ---------
-    // You can find it in the Firebase console: Project settings -> General -> SDK setup and config
-    // Import the functions you need from the SDKs you need
-
-import { initializeApp } from "firebase/app";
-
-// TODO: Add SDKs for Firebase products that you want to use
-
-// https://firebase.google.com/docs/web/setup#available-libraries
+<div class="app">
+<header>
+<div class="logo">MS</div>
+<div>
+<h1>MedShare</h1>
+<p class="lead">Shared medication dashboard — quick logging from iPhone Shortcuts</p>
+</div>
+</header>
 
 
-
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-
-const firebaseConfig = {
-
-  apiKey: "AIzaSyB09h7xfQXCCXu_TjZkG7Ro59HFzQtrW8c",
-
-  authDomain: "medtrack-9b220.firebaseapp.com",
-
-  projectId: "medtrack-9b220",
-
-  storageBucket: "medtrack-9b220.firebasestorage.app",
-
-  messagingSenderId: "419299696230",
-
-  appId: "1:419299696230:web:509ed433ac9a391b4797a7"
-
-};
+<main style="margin-top:12px">
+<div class="cards">
+<div class="card">
+<h3>Today's schedule</h3>
+<div id="schedule">
+<!-- populated by JS -->
+</div>
+<div style="margin-top:8px;text-align:right"><button class="btn" id="refreshBtn">Refresh</button></div>
+</div>
 
 
+<div class="card">
+<h3>Live status</h3>
+<div id="liveStatus">
+<div style="font-size:13px;color:var(--muted);">Listening for events...</div>
+</div>
+<div class="log" id="log"></div>
+</div>
+</div>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
 
-    const scheduleEl = document.getElementById('schedule');
-    const logEl = document.getElementById('log');
-    const liveStatus = document.getElementById('liveStatus');
-
-    // Example schedule - you can change this via JS or add UI later
-    const defaultSchedule = ["08:00","14:00","20:00"];
-
-    function renderSchedule(takenMap = {}){
-      scheduleEl.innerHTML = '';
-      defaultSchedule.forEach(t =>{
-        const div = document.createElement('div');
-        div.className = 'med-row';
-        const left = document.createElement('div');
-        left.innerHTML = `<div class='time'>${t}</div><div style='font-size:13px;color:var(--muted)'>Elvanse 30mg</div>`;
-        const right = document.createElement('div');
-        if (takenMap[t]){
-          right.innerHTML = `<span class='taken'>Taken by ${takenMap[t].user} at ${new Date(takenMap[t].ts).toLocaleTimeString()}</span>`;
-        } else {
-          const btn = document.createElement('button');
-          btn.className='btn';
-          btn.textContent='Mark taken';
-          btn.onclick = ()=>{ quickLog('Manual', 'Elvanse', t); }
-          right.appendChild(btn);
-        }
-        div.appendChild(left);div.appendChild(right);
-        scheduleEl.appendChild(div);
-      })
-    }
-
-    // Parse URL params; if present, auto-log an event and show confirmation
-    async function checkUrlForAutoLog(){
-      const params = new URLSearchParams(location.search);
-      if (params.has('user') && params.has('med') && params.has('time')){
-        const user = params.get('user');
-        const med = params.get('med');
-        const time = params.get('time');
-        await quickLog(user, med, time);
-        // Clean URL for nicer UX
-        history.replaceState({}, '', '/');
-        document.body.style.background = ''; // no-op visual hook
-        // Show a simple message
-        alert(`${med} logged for ${user} at ${new Date().toLocaleTimeString()}`);
-      }
-    }
-
-    // Quick log function: adds a document to 'events' collection
-    async function quickLog(user, med, scheduledTime){
-      try{
-        await addDoc(collection(db, 'events'), {
-          user,
-          med,
-          scheduledTime,
-          ts: serverTimestamp()
-        });
-      } catch(e){
-        console.error('Error logging event', e);
-        alert('Failed to log event. Check console.');
-      }
-    }
-
-    // Manual controls wiring
-    document.getElementById('markBtn').addEventListener('click', ()=>{
-      const user = document.getElementById('userName').value || 'Manual';
-      const med = document.getElementById('medName').value || 'Elvanse';
-      const time = document.getElementById('scheduledTime').value || new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-      quickLog(user, med, time);
-    });
-
-    document.getElementById('refreshBtn').addEventListener('click', ()=>renderSchedule());
-
-    // Real-time listener for events
-    const q = query(collection(db, 'events'), orderBy('ts','desc'));
-    onSnapshot(q, snapshot=>{
-      liveStatus.innerHTML = '';
-      const takenMap = {};
-      logEl.innerHTML = '';
-      snapshot.forEach(docSnap=>{
-        const data = docSnap.data();
-        // serverTimestamp() may be null for very recent writes; handle gracefully
-        const ts = data.ts && data.ts.toDate ? data.ts.toDate() : new Date();
-        const key = data.scheduledTime || 'free';
-        // keep the first (most recent) taker per scheduled time
-        if (!takenMap[key]) takenMap[key] = { user: data.user, ts: ts };
-
-        const item = document.createElement('div');
-        item.className = 'log-item';
-        item.textContent = `${ts.toLocaleString()} — ${data.user} logged ${data.med} (scheduled ${data.scheduledTime || 'n/a'})`;
-        logEl.appendChild(item);
-      });
-
-      if (Object.keys(takenMap).length === 0){
-        liveStatus.innerHTML = `<div style='color:var(--muted)'>No doses logged yet</div>`;
-      } else {
-        const frag = document.createDocumentFragment();
-        for (const [time, info] of Object.entries(takenMap)){
-          const el = document.createElement('div');
-          el.innerHTML = `<span class='status-dot status-ok'></span><strong>${time}</strong> — ${info.user} at ${new Date(info.ts).toLocaleTimeString()}`;
-          frag.appendChild(el);
-        }
-        liveStatus.appendChild(frag);
-      }
-      renderSchedule(takenMap);
-    });
-
-    // Initialization
-    checkUrlForAutoLog();
-    renderSchedule();
-
-    // Service worker registration for PWA (optional)
-    if ('serviceWorker' in navigator){
-      navigator.serviceWorker.register('/sw.js').catch(()=>{});
-    }
-  </script>
-</body>
+<div style="margin-top:12px" class="card">
+<h3>Manual actions</h3>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<input id="userName" placeholder="Your name" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit">
+<input id="medName" placeholder="Medication name" style="width:220px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit">
+<input id="scheduledTime" placeholder="Scheduled time (HH:MM)" style="width:120px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit">
+<button class="btn" id="markBtn">Mark taken</button>
 </html>
