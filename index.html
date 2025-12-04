@@ -3,107 +3,171 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Pill Tracker</title>
+<title>Med-Given Tracker</title>
+
+<!-- iOS home screen icon -->
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,
+<svg xmlns='http://www.w3.org/2000/svg' width='1024' height='1024'>
+  <rect width='1024' height='1024' rx='220' ry='220' fill='#f4f4f5'/>
+  <circle cx='512' cy='420' r='230' fill='#ffe27a'/>
+  <circle cx='440' cy='360' r='40' fill='#000'/>
+  <circle cx='590' cy='360' r='40' fill='#000'/>
+  <path d='M350 480 Q512 620 670 480' stroke='#000' stroke-width='35' fill='none' stroke-linecap='round'/>
+  <rect x='380' y='650' width='260' height='120' rx='40' fill='#d15b5b'/>
+  <rect x='380' y='710' width='260' height='60' rx='30' fill='#fff'/>
+</svg>">
+
 <style>
     body {
         font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-        background:#f6f6f6;
-        margin:0;
-        padding:20px;
-        max-width:600px;
-        margin:auto;
+        margin: 0; padding: 0;
+        background: #fafafa;
+        color: #222;
     }
-    h2 { margin-top:30px; }
-    #loginBox {
-        margin-top:80px;
-        padding:20px;
-        background:white;
-        border-radius:12px;
-        box-shadow:0 2px 6px rgba(0,0,0,0.1);
-    }
-    #app { display:none; }
 
-    button {
-        width:100%;
-        padding:16px;
-        font-size:18px;
-        border:none;
-        border-radius:12px;
-        background:#007aff;
-        color:white;
-        margin:10px 0;
+    #loginBox {
+        padding: 40px;
+        text-align: center;
+        max-width: 340px;
+        margin: 90px auto;
+        background: white;
+        border-radius: 18px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
     }
-    button:disabled { background:#ccc; }
+
+    #pinInput {
+        padding: 14px;
+        font-size: 22px;
+        width: 80%;
+        text-align: center;
+        margin-top: 20px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+    }
+
+    .btn {
+        background: #007aff;
+        color: white;
+        padding: 12px 22px;
+        margin: 10px;
+        border: none;
+        border-radius: 12px;
+        font-size: 18px;
+    }
+
+    .btn:disabled {
+        opacity: 0.4;
+    }
+
+    #app { display: none; padding: 20px; }
 
     .dayRow {
-        display:flex;
-        align-items:center;
-        margin:8px 0;
+        display: flex; justify-content: space-between;
+        padding: 12px;
+        background: white;
+        margin-bottom: 6px;
+        border-radius: 10px;
     }
-    .circles { margin-left:auto; display:flex; gap:8px; }
+    .circles { display: flex; gap: 8px; }
     .circle {
-        width:22px; height:22px;
-        border-radius:50%;
-        border:2px solid #555;
+        width: 22px; height: 22px;
+        border: 2px solid #555;
+        border-radius: 50%;
     }
-    .half { background:linear-gradient(to right, #555 50%, transparent 50%); }
-    .full { background:#555; }
+    .circle.half { background: #f9c74f; }
+    .circle.full { background: #4caf50; border-color:#4caf50; }
+
 </style>
 </head>
 
 <body>
 
-<!-- ---------------- SECRET LOGIN --------------- -->
+<!-- ================= LOGIN SCREEN ================= -->
 <div id="loginBox">
-    <h2>Enter PIN</h2>
-    <input id="pinInput" type="password" placeholder="PIN" style="padding:12px; width:100%; font-size:18px;">
-    <button onclick="checkPin()">Unlock</button>
+    <h2>Enter PIN or use FaceID</h2>
+    <input id="pinInput" type="password" placeholder="PIN">
+    <br><br>
+    <button class="btn" onclick="checkPin()">Unlock</button>
+    <button class="btn" onclick="faceUnlock()">FaceID</button>
     <p id="pinError" style="color:red; display:none;">Incorrect PIN</p>
 </div>
 
-<!-- ---------------- MAIN APP ------------------- -->
+<!-- ================= MAIN APP ================= -->
 <div id="app">
-    <h1>Pill Tracker</h1>
+    <h1>Medication Given</h1>
 
-    <div id="status"></div>
+    <button id="amBtn" class="btn" onclick="logDose('06:30')">Log 06:30</button>
+    <button id="pmBtn" class="btn" onclick="logDose('17:30')">Log 17:30</button>
 
-    <button id="amBtn" onclick="logDose('06:30')">Log 06:30</button>
-    <button id="pmBtn" onclick="logDose('17:30')">Log 17:30</button>
+    <p id="status"></p>
 
     <h2>Past 7 Days</h2>
     <div id="history"></div>
 
-    <h2>Admin</h2>
-    <button style="background:#b00020" onclick="clearAll()">Clear All Data</button>
+    <button class="btn" onclick="clearAll()">Clear All Data</button>
 </div>
 
-<!-- ------------- FIREBASE + APP LOGIC ---------------- -->
+<!-- ================= SCRIPTS ================= -->
 <script type="module">
+/* ======== BASIC SECURITY PIN ======== */
+const SECRET_PIN = "12psab96"; // CHANGE THIS
 
-// ---------- LOCK SCREEN ----------
-const SECRET_PIN = "1234"; // ← SET YOUR PIN HERE
 
+/* ======== FACE ID UNLOCK (WebAuthn) ========
+   Creates a local publicKey credential bound to device biometrics.
+   Very small, simple flow for iOS.
+*/
+async function faceUnlock() {
+    try {
+        // Request assertion from any local credential
+        const assertion = await navigator.credentials.get({
+            publicKey: {
+                challenge: new Uint8Array([1,2,3,4]),
+                timeout: 60000,
+                userVerification: "required"
+            }
+        });
+
+        // If returned, FaceID passed
+        loginBox.style.display = "none";
+        app.style.display = "block";
+        startFirebase();
+    } catch (e) {
+        alert("FaceID failed or not set up.");
+    }
+}
+window.faceUnlock = faceUnlock;
+
+
+/* ======== PASSWORD UNLOCK ======== */
 function checkPin() {
     if (pinInput.value === SECRET_PIN) {
         loginBox.style.display = "none";
         app.style.display = "block";
-        initApp();  // start Firebase + UI
+        startFirebase();
     } else {
         pinError.style.display = "block";
     }
 }
+window.checkPin = checkPin;
 
-// ============ APP STARTUP AFTER UNLOCK ============
-async function initApp() {
 
-    /* ------------------ FIREBASE SDK LOAD ------------------ */
+/* ================================================================
+   FIREBASE INITIALIZATION (after unlock)
+================================================================ */
+let initStarted = false;
+
+async function startFirebase() {
+    if (initStarted) return;
+    initStarted = true;
+
     const { initializeApp } =
         await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js");
 
-    const { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query } =
+    const { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs } =
         await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
 
-    /* ------------------ REPLACE WITH YOUR CONFIG ------------------ */
+    /* ==== INSERT YOUR FIREBASE CONFIG HERE ==== */
     const firebaseConfig = {
       apiKey: "AIzaSyB09h7xfQXCCXu_TjZkG7Ro59HFzQtrW8c",
       authDomain: "medtrack-9b220.firebaseapp.com",
@@ -112,17 +176,27 @@ async function initApp() {
       messagingSenderId: "419299696230",
       appId: "1:419299696230:web:509ed433ac9a391b4797a7"
     };
-    /* -------------------------------------------------------------- */
 
     const appFB = initializeApp(firebaseConfig);
     const db = getFirestore(appFB);
 
+    window._pillDB = db;
+
+    initUI();
+}
+
+
+/* ================================================================
+   UI + LOGIC AFTER FIREBASE LOADED
+================================================================ */
+async function initUI() {
+    const db = window._pillDB;
+
     const doseBtnAM = document.getElementById("amBtn");
     const doseBtnPM = document.getElementById("pmBtn");
-    const statusDiv = document.getElementById("status");
     const historyDiv = document.getElementById("history");
+    const statusDiv = document.getElementById("status");
 
-    // ---------- UTILITIES ----------
     function todayKey(time) {
         const d = new Date();
         const y = d.getFullYear();
@@ -131,7 +205,6 @@ async function initApp() {
         return `${y}-${m}-${day}_${time}`;
     }
 
-    // ---------- LOAD INITIAL BUTTON STATE ----------
     async function updateButtons() {
         await checkButton("06:30", doseBtnAM);
         await checkButton("17:30", doseBtnPM);
@@ -142,99 +215,86 @@ async function initApp() {
         const ref = doc(db, "pillLog", key);
         const snap = await getDoc(ref);
         btn.disabled = snap.exists();
-        btn.innerText = snap.exists() ?
-            `${time} ✔ Logged` :
-            `Log ${time}`;
+        btn.innerText = snap.exists() ? `${time} ✔ Given` : `Log ${time}`;
     }
 
-    // ---------- LOGGING ----------
-    async function logDose(time) {
+    window.logDose = async function(time) {
         const key = todayKey(time);
         const ref = doc(db, "pillLog", key);
-
         const snap = await getDoc(ref);
-        if (snap.exists()) {
-            statusDiv.innerHTML = "Already logged.";
-            return;
-        }
-        await setDoc(ref, { timestamp: new Date().toISOString() });
 
-        statusDiv.innerHTML = "Saved!";
+        if (!snap.exists()) {
+            await setDoc(ref, { timestamp: new Date().toISOString() });
+        }
+
+        statusDiv.innerText = "Saved!";
         updateButtons();
         loadHistory();
-    }
+    };
 
-    // ---------- LOAD LAST 7 DAYS ----------
     async function loadHistory() {
         historyDiv.innerHTML = "";
-
         const now = new Date();
-        const items = [];
+        const rows = [];
 
-        for (let i=0;i<7;i++) {
+        for (let i = 0; i < 7; i++) {
             const d = new Date(now);
             d.setDate(now.getDate() - i);
 
             const y = d.getFullYear();
             const m = String(d.getMonth()+1).padStart(2,"0");
             const day = String(d.getDate()).padStart(2,"0");
-            const dateKey = `${y}-${m}-${day}`;
+            const base = `${y}-${m}-${day}`;
 
-            const amRef = doc(db, "pillLog", `${dateKey}_06:30`);
-            const pmRef = doc(db, "pillLog", `${dateKey}_17:30`);
+            const am = (await getDoc(doc(db, "pillLog", `${base}_06:30`))).exists();
+            const pm = (await getDoc(doc(db, "pillLog", `${base}_17:30`))).exists();
 
-            const am = (await getDoc(amRef)).exists();
-            const pm = (await getDoc(pmRef)).exists();
-
-            items.push({ date: dateKey, am, pm });
+            rows.push({ date: base, am, pm });
         }
 
-        items.forEach(item => {
-            const row = document.createElement("div");
-            row.className = "dayRow";
-            row.innerHTML = `<strong>${item.date}</strong>`;
+        rows.forEach(r => {
+            const div = document.createElement("div");
+            div.className = "dayRow";
+
+            div.innerHTML = `<strong>${r.date}</strong>`;
 
             const circles = document.createElement("div");
             circles.className = "circles";
 
-            // AM circle
-            const c1 = document.createElement("div");
-            c1.className = "circle " + (item.am ? "half" : "");
-            circles.appendChild(c1);
+            const amC = document.createElement("div");
+            const pmC = document.createElement("div");
+            amC.className = "circle " + (r.am ? "half" : "");
+            pmC.className = "circle " + (r.pm ? "half" : "");
 
-            // PM circle
-            const c2 = document.createElement("div");
-            c2.className = "circle " + (item.pm ? "half" : "");
-            circles.appendChild(c2);
-
-            // If both logged → merge into one full circle instead
-            if (item.am && item.pm) {
-                c1.className = "circle full";
-                c2.style.display="none";
+            if (r.am && r.pm) {
+                amC.className = "circle full";
+                pmC.style.display = "none";
             }
 
-            row.appendChild(circles);
-            historyDiv.appendChild(row);
+            circles.appendChild(amC);
+            circles.appendChild(pmC);
+            div.appendChild(circles);
+
+            historyDiv.appendChild(div);
         });
     }
 
-    // ---------- CLEAR ALL DATA ----------
-    async function clearAll() {
+    window.clearAll = async function() {
         if (!confirm("Clear ALL data?")) return;
+
         const col = collection(db, "pillLog");
-        const qs = await getDocs(col);
-        for (const d of qs.docs) {
-            await deleteDoc(d.ref);
-        }
+        const docs = await getDocs(col);
+
+        for (const d of docs.docs) await deleteDoc(d.ref);
+
         updateButtons();
         loadHistory();
-        statusDiv.innerHTML = "All data cleared.";
-    }
+    };
 
-    // Start
     updateButtons();
     loadHistory();
 }
+
 </script>
 </body>
 </html>
