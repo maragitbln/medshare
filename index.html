@@ -1,173 +1,167 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Med-Given Tracker</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MedShare — Given Tracker</title>
 
-<!-- iOS home screen icon -->
-<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,
-<svg xmlns='http://www.w3.org/2000/svg' width='1024' height='1024'>
-  <rect width='1024' height='1024' rx='220' ry='220' fill='#f4f4f5'/>
-  <circle cx='512' cy='420' r='230' fill='#ffe27a'/>
-  <circle cx='440' cy='360' r='40' fill='#000'/>
-  <circle cx='590' cy='360' r='40' fill='#000'/>
-  <path d='M350 480 Q512 620 670 480' stroke='#000' stroke-width='35' fill='none' stroke-linecap='round'/>
-  <rect x='380' y='650' width='260' height='120' rx='40' fill='#d15b5b'/>
-  <rect x='380' y='710' width='260' height='60' rx='30' fill='#fff'/>
-</svg>">
+<!-- Use a PNG named 'icon.png' placed in the same folder as index.html -->
+<link rel="apple-touch-icon" href="icon.png">
+
+<meta name="theme-color" content="#071126">
 
 <style>
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-        margin: 0; padding: 0;
-        background: #fafafa;
-        color: #222;
-    }
-
-    #loginBox {
-        padding: 40px;
-        text-align: center;
-        max-width: 340px;
-        margin: 90px auto;
-        background: white;
-        border-radius: 18px;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-    }
-
-    #pinInput {
-        padding: 14px;
-        font-size: 22px;
-        width: 80%;
-        text-align: center;
-        margin-top: 20px;
-        border-radius: 10px;
-        border: 1px solid #ccc;
-    }
-
-    .btn {
-        background: #007aff;
-        color: white;
-        padding: 12px 22px;
-        margin: 10px;
-        border: none;
-        border-radius: 12px;
-        font-size: 18px;
-    }
-
-    .btn:disabled {
-        opacity: 0.4;
-    }
-
-    #app { display: none; padding: 20px; }
-
-    .dayRow {
-        display: flex; justify-content: space-between;
-        padding: 12px;
-        background: white;
-        margin-bottom: 6px;
-        border-radius: 10px;
-    }
-    .circles { display: flex; gap: 8px; }
-    .circle {
-        width: 22px; height: 22px;
-        border: 2px solid #555;
-        border-radius: 50%;
-    }
-    .circle.half { background: #f9c74f; }
-    .circle.full { background: #4caf50; border-color:#4caf50; }
-
+  :root{
+    --bg:#071126;
+    --card:#0b1220;
+    --muted:#9aa6b2;
+    --accent:#6ee7b7;
+    --danger:#f87171;
+    --glass: rgba(255,255,255,0.03);
+  }
+  html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial;color:#e6eef6;background:linear-gradient(180deg,#071126 0%,#0b1220 100%);}
+  .wrap{max-width:820px;margin:12px auto;padding:14px}
+  header{display:flex;align-items:center;gap:12px}
+  .logo{width:56px;height:56px;background:linear-gradient(135deg,#22c1c3,#6ee7b7);border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#04202a}
+  h1{margin:0;font-size:20px}
+  p.lead{margin:4px 0 14px;color:var(--muted)}
+  .grid{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-top:12px}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:12px;border-radius:12px;box-shadow:0 8px 24px rgba(2,6,23,0.6)}
+  .small{font-size:13px;color:var(--muted)}
+  .row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--glass)}
+  .time{font-weight:700}
+  .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;color:var(--accent);cursor:pointer}
+  .btn-primary{background:linear-gradient(90deg,#22c1c3,#6ee7b7);color:#04202a;border:none;padding:10px 16px;border-radius:12px;cursor:pointer}
+  .danger{background:var(--danger);color:#111;border:none;padding:10px 12px;border-radius:10px}
+  input,select{padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+  .history{margin-top:12px}
+  .day{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,0.02)}
+  .circles{display:flex;gap:8px;align-items:center}
+  .circle{width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,0.06);display:inline-block}
+  .circle.empty{background:transparent}
+  .circle.half{background:linear-gradient(90deg,#6ee7b7 50%, transparent 50%)}
+  .circle.full{background:#6ee7b7;border-color:#6ee7b7}
+  footer{margin-top:14px;color:var(--muted);font-size:13px;text-align:center}
+  .top-actions{display:flex;gap:8px;align-items:center}
+  .muted{color:var(--muted)}
+  .hidden{display:none}
 </style>
 </head>
-
 <body>
+  <div class="wrap">
+    <header>
+      <div class="logo">MS</div>
+      <div>
+        <h1>MedShare</h1>
+        <p class="lead">Shared medication tracker — quick logging from Shortcuts</p>
+      </div>
+    </header>
 
-<!-- ================= LOGIN SCREEN ================= -->
-<div id="loginBox">
-    <h2>Enter PIN or use FaceID</h2>
-    <input id="pinInput" type="password" placeholder="PIN">
-    <br><br>
-    <button class="btn" onclick="checkPin()">Unlock</button>
-    <button class="btn" onclick="faceUnlock()">FaceID</button>
-    <p id="pinError" style="color:red; display:none;">Incorrect PIN</p>
-</div>
+    <!-- PIN prompt (or nothing if cached unlocked) -->
+    <div id="pinCard" class="card" style="margin-top:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-weight:700">Unlock MedShare</div>
+          <div class="small muted">Enter PIN to see dashboard. (Home-screen opens keep you unlocked.)</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="pinInput" type="password" placeholder="PIN" style="width:120px">
+          <button id="pinBtn" class="btn-primary">Unlock</button>
+        </div>
+      </div>
+      <div id="pinMsg" class="small muted" style="margin-top:8px;"></div>
+    </div>
 
-<!-- ================= MAIN APP ================= -->
-<div id="app">
-    <h1>Medication Given</h1>
+    <div id="appUI" class="hidden">
+      <div class="grid">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-weight:700">Today's schedule</div>
+              <div class="small muted">Standard times: 06:30 and 17:30</div>
+            </div>
+            <div style="text-align:right">
+              <div class="small muted">Logged by:</div>
+              <div id="lastGiven" class="small muted">—</div>
+            </div>
+          </div>
 
-    <button id="amBtn" class="btn" onclick="logDose('06:30')">Log 06:30</button>
-    <button id="pmBtn" class="btn" onclick="logDose('17:30')">Log 17:30</button>
+          <div class="row" style="margin-top:12px">
+            <div>
+              <div class="time">06:30</div>
+              <div class="small muted">Medication</div>
+            </div>
+            <div id="btnSlotAM">
+              <button class="btn" id="amManualBtn">Mark given</button>
+            </div>
+          </div>
 
-    <p id="status"></p>
+          <div class="row">
+            <div>
+              <div class="time">17:30</div>
+              <div class="small muted">Medication</div>
+            </div>
+            <div id="btnSlotPM">
+              <button class="btn" id="pmManualBtn">Mark given</button>
+            </div>
+          </div>
 
-    <h2>Past 7 Days</h2>
-    <div id="history"></div>
+          <div style="margin-top:10px" class="small muted">Manual logs also update the shared record.</div>
 
-    <button class="btn" onclick="clearAll()">Clear All Data</button>
-</div>
+          <div class="history">
+            <h3 style="margin:12px 0 6px 0">Past 7 days</h3>
+            <div id="weekHistory"></div>
+          </div>
+        </div>
 
-<!-- ================= SCRIPTS ================= -->
+        <div class="card">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div>
+              <div style="font-weight:700">Manual quick log</div>
+              <div class="small muted">Use when you want to log custom user or med</div>
+            </div>
+
+            <input id="manualUser" placeholder="Name (e.g. Ben)">
+            <input id="manualMed" placeholder="Medication (e.g. Elvanse)" style="margin-top:8px">
+            <select id="manualTime" style="margin-top:8px">
+              <option value="06:30">06:30</option>
+              <option value="17:30">17:30</option>
+            </select>
+
+            <button id="manualLogBtn" class="btn-primary" style="margin-top:8px">Log manual</button>
+
+            <hr style="opacity:0.06;margin:12px 0">
+
+            <div>
+              <div style="font-weight:700">Danger zone</div>
+              <div class="small muted">Clears the entire dataset (use with caution)</div>
+            </div>
+            <button id="clearBtn" class="danger">Clear all logs</button>
+
+            <div style="margin-top:12px">
+              <div class="small muted">Add to home screen for faster access. Shortcut logging URL example below.</div>
+            </div>
+
+            <div style="margin-top:8px" class="small muted">
+              <div>Shortcut logging URL (embed PIN):</div>
+              <code id="shortcutExample" style="font-size:12px;display:block;word-break:break-all;margin-top:6px"></code>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="small muted">Tip: Add to Home Screen to keep you unlocked with local cache. Shortcut calls include PIN to auto-log.</div>
+      </footer>
+    </div>
+  </div>
+
 <script type="module">
-/* ======== BASIC SECURITY PIN ======== */
-const SECRET_PIN = "12psab96"; // CHANGE THIS
+/* -------------------------
+  IMPORTANT: update these
+----------------------------*/
 
-
-/* ======== FACE ID UNLOCK (WebAuthn) ========
-   Creates a local publicKey credential bound to device biometrics.
-   Very small, simple flow for iOS.
-*/
-async function faceUnlock() {
-    try {
-        // Request assertion from any local credential
-        const assertion = await navigator.credentials.get({
-            publicKey: {
-                challenge: new Uint8Array([1,2,3,4]),
-                timeout: 60000,
-                userVerification: "required"
-            }
-        });
-
-        // If returned, FaceID passed
-        loginBox.style.display = "none";
-        app.style.display = "block";
-        startFirebase();
-    } catch (e) {
-        alert("FaceID failed or not set up.");
-    }
-}
-window.faceUnlock = faceUnlock;
-
-
-/* ======== PASSWORD UNLOCK ======== */
-function checkPin() {
-    if (pinInput.value === SECRET_PIN) {
-        loginBox.style.display = "none";
-        app.style.display = "block";
-        startFirebase();
-    } else {
-        pinError.style.display = "block";
-    }
-}
-window.checkPin = checkPin;
-
-
-/* ================================================================
-   FIREBASE INITIALIZATION (after unlock)
-================================================================ */
-let initStarted = false;
-
-async function startFirebase() {
-    if (initStarted) return;
-    initStarted = true;
-
-    const { initializeApp } =
-        await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js");
-
-    const { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs } =
-        await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-
-    /* ==== INSERT YOUR FIREBASE CONFIG HERE ==== */
+/* 1) Paste Firebase config from Firebase console (Web app) here */
     const firebaseConfig = {
       apiKey: "AIzaSyB09h7xfQXCCXu_TjZkG7Ro59HFzQtrW8c",
       authDomain: "medtrack-9b220.firebaseapp.com",
@@ -177,124 +171,271 @@ async function startFirebase() {
       appId: "1:419299696230:web:509ed433ac9a391b4797a7"
     };
 
-    const appFB = initializeApp(firebaseConfig);
-    const db = getFirestore(appFB);
+/* 2) Set your PIN (used for dashboard unlock) */
+const SECRET_PIN = "12psab96";
 
-    window._pillDB = db;
+/* 3) How long to keep "unlocked" in ms (e.g., 7 days) */
+const UNLOCK_DURATION = 7 * 24 * 3600 * 1000;
 
-    initUI();
+/* 4) Shortcut URL base (your GitHub Pages site) - update after you publish */
+const SITE_BASE = location.origin + location.pathname.replace(/\/[^/]*$/, '/'); // auto base, usually works
+
+/* -------------------------
+  End of user-editable options
+----------------------------*/
+
+/* Imports */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import {
+  getFirestore, collection, doc, getDoc, setDoc, deleteDoc, getDocs, query, orderBy
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+/* Initialize Firebase app (we do it immediately so Firestore functions are available).
+   But we will delay "app UI" until PIN check completes.
+*/
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* Utility helpers */
+function qs(param) { return new URLSearchParams(location.search).get(param); }
+function nowDateKey() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function todayDocId(time) { return `${nowDateKey()}_${time}`; }
+function makeShortcutUrl(params) {
+  const base = SITE_BASE + (SITE_BASE.endsWith('/') ? '' : '/');
+  const u = new URL(base + (location.pathname.split('/').pop() || 'index.html'));
+  Object.keys(params).forEach(k => u.searchParams.set(k, params[k]));
+  return u.toString();
 }
 
+/* Elements */
+const pinCard = document.getElementById('pinCard');
+const pinInput = document.getElementById('pinInput');
+const pinBtn = document.getElementById('pinBtn');
+const pinMsg = document.getElementById('pinMsg');
 
-/* ================================================================
-   UI + LOGIC AFTER FIREBASE LOADED
-================================================================ */
-async function initUI() {
-    const db = window._pillDB;
+const appUI = document.getElementById('appUI');
+const amManualBtn = document.getElementById('amManualBtn');
+const pmManualBtn = document.getElementById('pmManualBtn');
+const lastGiven = document.getElementById('lastGiven');
 
-    const doseBtnAM = document.getElementById("amBtn");
-    const doseBtnPM = document.getElementById("pmBtn");
-    const historyDiv = document.getElementById("history");
-    const statusDiv = document.getElementById("status");
+const weekHistory = document.getElementById('weekHistory');
+const manualUser = document.getElementById('manualUser');
+const manualMed = document.getElementById('manualMed');
+const manualTime = document.getElementById('manualTime');
+const manualLogBtn = document.getElementById('manualLogBtn');
+const clearBtn = document.getElementById('clearBtn');
+const shortcutExample = document.getElementById('shortcutExample');
 
-    function todayKey(time) {
-        const d = new Date();
-        const y = d.getFullYear();
-        const m = String(d.getMonth()+1).padStart(2,"0");
-        const day = String(d.getDate()).padStart(2,"0");
-        return `${y}-${m}-${day}_${time}`;
-    }
+/* Shortcut logging flow:
+   Option A requested two separate URLs:
+   - Dashboard: index.html (the Home Screen shortcut)
+   - Shortcut logging URL: index.html?action=log&pin=...&time=06:30&user=Ben&med=Elvanse
 
-    async function updateButtons() {
-        await checkButton("06:30", doseBtnAM);
-        await checkButton("17:30", doseBtnPM);
-    }
+   We'll implement the action=log behaviour here so the Shortcut link calls the same file but with query params.
+*/
 
-    async function checkButton(time, btn) {
-        const key = todayKey(time);
-        const ref = doc(db, "pillLog", key);
-        const snap = await getDoc(ref);
-        btn.disabled = snap.exists();
-        btn.innerText = snap.exists() ? `${time} ✔ Given` : `Log ${time}`;
-    }
+/* Check if loaded with action=log */
+(async function handleAutoLog() {
+  const action = qs('action');
+  if (action !== 'log') return;
 
-    window.logDose = async function(time) {
-        const key = todayKey(time);
-        const ref = doc(db, "pillLog", key);
-        const snap = await getDoc(ref);
+  const pin = qs('pin') || '';
+  const time = qs('time') || '';
+  const user = qs('user') || 'Shortcut';
+  const med = qs('med') || 'Medication';
 
-        if (!snap.exists()) {
-            await setDoc(ref, { timestamp: new Date().toISOString() });
-        }
+  // validate minimal
+  if (pin !== SECRET_PIN) {
+    document.body.innerHTML = `<div style="padding:30px;color:#fff;background:#111;height:100vh;display:flex;align-items:center;justify-content:center"><div style="max-width:600px"><h2 style="color:#f88">Auth failed</h2><p style="color:#ddd">Invalid pin in shortcut URL. Logging aborted.</p></div></div>`;
+    return;
+  }
+  if (!time) {
+    document.body.innerHTML = `<div style="padding:30px;color:#fff;background:#111;height:100vh;display:flex;align-items:center;justify-content:center"><div style="max-width:600px"><h2 style="color:#f88">Missing time</h2></div></div>`;
+    return;
+  }
 
-        statusDiv.innerText = "Saved!";
-        updateButtons();
-        loadHistory();
-    };
+  // check existing
+  const id = `${nowDateKey()}_${time}`;
+  const ref = doc(db, 'pillLog', id);
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    const d = snap.data();
+    document.body.innerHTML = `<div style="padding:30px;color:#fff;background:#071126;height:100vh;display:flex;align-items:center;justify-content:center"><div style="max-width:600px;text-align:center"><h2 style="color:#6ee7b7">Already given</h2><p style="color:#cfe">${d.user || d.by || 'someone'} gave ${d.med || med} at ${new Date(d.timestamp).toLocaleTimeString()}</p></div></div>`;
+    return;
+  }
 
-    async function loadHistory() {
-        historyDiv.innerHTML = "";
-        const now = new Date();
-        const rows = [];
+  // create record
+  await setDoc(ref, { user, med, timestamp: new Date().toISOString() });
 
-        for (let i = 0; i < 7; i++) {
-            const d = new Date(now);
-            d.setDate(now.getDate() - i);
+  document.body.innerHTML = `<div style="padding:30px;color:#071126;background:#6ee7b7;height:100vh;display:flex;align-items:center;justify-content:center"><div style="max-width:600px;text-align:center"><h2 style="color:#022">Logged ✓</h2><p style="color:#022">Recorded ${med} for ${user} at ${time}.</p></div></div>`;
+  return;
+})();
 
-            const y = d.getFullYear();
-            const m = String(d.getMonth()+1).padStart(2,"0");
-            const day = String(d.getDate()).padStart(2,"0");
-            const base = `${y}-${m}-${day}`;
+/* ---------- PIN unlocking & caching ---------- */
+function isUnlocked() {
+  try {
+    const data = JSON.parse(localStorage.getItem('medshare_unlocked') || 'null');
+    if (!data) return false;
+    return Date.now() < data.expiry;
+  } catch (e) { return false; }
+}
+function setUnlocked() {
+  localStorage.setItem('medshare_unlocked', JSON.stringify({ expiry: Date.now() + UNLOCK_DURATION }));
+}
+function clearUnlocked() { localStorage.removeItem('medshare_unlocked'); }
 
-            const am = (await getDoc(doc(db, "pillLog", `${base}_06:30`))).exists();
-            const pm = (await getDoc(doc(db, "pillLog", `${base}_17:30`))).exists();
-
-            rows.push({ date: base, am, pm });
-        }
-
-        rows.forEach(r => {
-            const div = document.createElement("div");
-            div.className = "dayRow";
-
-            div.innerHTML = `<strong>${r.date}</strong>`;
-
-            const circles = document.createElement("div");
-            circles.className = "circles";
-
-            const amC = document.createElement("div");
-            const pmC = document.createElement("div");
-            amC.className = "circle " + (r.am ? "half" : "");
-            pmC.className = "circle " + (r.pm ? "half" : "");
-
-            if (r.am && r.pm) {
-                amC.className = "circle full";
-                pmC.style.display = "none";
-            }
-
-            circles.appendChild(amC);
-            circles.appendChild(pmC);
-            div.appendChild(circles);
-
-            historyDiv.appendChild(div);
-        });
-    }
-
-    window.clearAll = async function() {
-        if (!confirm("Clear ALL data?")) return;
-
-        const col = collection(db, "pillLog");
-        const docs = await getDocs(col);
-
-        for (const d of docs.docs) await deleteDoc(d.ref);
-
-        updateButtons();
-        loadHistory();
-    };
-
-    updateButtons();
-    loadHistory();
+async function showAppIfUnlocked() {
+  if (isUnlocked()) {
+    pinCard.classList.add('hidden');
+    appUI.classList.remove('hidden');
+    await startAppUI();
+  } else {
+    pinCard.classList.remove('hidden');
+    appUI.classList.add('hidden');
+  }
 }
 
+/* PIN button */
+pinBtn.addEventListener('click', async () => {
+  pinMsg.textContent = '';
+  if (pinInput.value === SECRET_PIN) {
+    setUnlocked();
+    pinCard.classList.add('hidden');
+    appUI.classList.remove('hidden');
+    await startAppUI();
+  } else {
+    pinMsg.textContent = 'Incorrect PIN';
+    pinInput.value = '';
+  }
+});
+
+/* Build Shortcut example URL */
+function showShortcutExample() {
+  const u = makeShortcutUrl({ action:'log', pin: SECRET_PIN, time: '06:30', user: 'Ben', med: 'Elvanse' });
+  shortcutExample.textContent = u;
+}
+
+/* ---------- App UI logic (after unlock) ---------- */
+let appStarted = false;
+async function startAppUI() {
+  if (appStarted) return;
+  appStarted = true;
+
+  // wire manual buttons
+  amManualBtn.addEventListener('click', async () => {
+    await manualLogQuick('06:30');
+  });
+  pmManualBtn.addEventListener('click', async () => {
+    await manualLogQuick('17:30');
+  });
+
+  manualLogBtn.addEventListener('click', async () => {
+    const user = manualUser.value.trim() || 'Manual';
+    const med = manualMed.value.trim() || 'Medication';
+    const time = manualTime.value;
+    await logGiven(user, med, time);
+  });
+
+  clearBtn.addEventListener('click', async () => {
+    if (!confirm('Delete ALL logs? This cannot be undone.')) return;
+    const col = collection(db, 'pillLog');
+    const docs = await getDocs(col);
+    for (const d of docs.docs) await deleteDoc(doc(db, 'pillLog', d.id));
+    await refreshUI();
+  });
+
+  showShortcutExample();
+  await refreshUI();
+}
+
+/* helper: quick manual log using default name */
+async function manualLogQuick(time) {
+  const user = manualUser.value.trim() || 'Manual';
+  const med = manualMed.value.trim() || 'Medication';
+  await logGiven(user, med, time);
+}
+
+/* Main logging function used by both manual and shortcut (shortcut uses separate handler earlier) */
+async function logGiven(user, med, time) {
+  const id = `${nowDateKey()}_${time}`;
+  const ref = doc(db, 'pillLog', id);
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    alert('Already logged for that time today.');
+    return;
+  }
+  await setDoc(ref, { user, med, timestamp: new Date().toISOString() });
+  await refreshUI();
+}
+
+/* Render week history and status */
+async function refreshUI() {
+  // last given quick check
+  const col = collection(db, 'pillLog');
+  const allDocs = await getDocs(col); // small DB, ok for prototype
+  let last = '—';
+  allDocs.docs.forEach(d => {
+    const data = d.data();
+    if (!last || new Date(data.timestamp) > new Date(last.ts || 0)) {
+      last = { ts: data.timestamp, user: data.user || '—', med: data.med || '—' };
+    }
+  });
+  lastGiven.textContent = last === '—' ? '—' : `${last.user} • ${new Date(last.ts).toLocaleString()}`;
+
+  // week overview
+  weekHistory.innerHTML = '';
+  const now = new Date();
+  for (let i=0;i<7;i++){
+    const d = new Date(now);
+    d.setDate(now.getDate() - i);
+    const dateKey = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const amId = `${dateKey}_06:30`;
+    const pmId = `${dateKey}_17:30`;
+    const amSnap = await getDoc(doc(db,'pillLog',amId));
+    const pmSnap = await getDoc(doc(db,'pillLog',pmId));
+    const am = amSnap.exists();
+    const pm = pmSnap.exists();
+
+    const row = document.createElement('div');
+    row.className = 'day';
+    row.innerHTML = `<div>${dateKey}</div>`;
+    const circles = document.createElement('div');
+    circles.className = 'circles';
+    const c1 = document.createElement('div');
+    const c2 = document.createElement('div');
+    c1.className = 'circle ' + (am ? (pm ? 'full' : 'half') : 'empty');
+    c2.className = 'circle ' + (pm ? (am ? 'hidden' : 'half') : 'empty');
+    if (pm && am) { c2.style.display='none'; } // show single full circle when both logged
+    circles.appendChild(c1);
+    circles.appendChild(c2);
+    row.appendChild(circles);
+    weekHistory.appendChild(row);
+  }
+
+  // update buttons state for today
+  const amSnapToday = await getDoc(doc(db,'pillLog', todayDocId('06:30')));
+  const pmSnapToday = await getDoc(doc(db,'pillLog', todayDocId('17:30')));
+  amManualBtn.disabled = amSnapToday.exists();
+  amManualBtn.textContent = amSnapToday.exists() ? '06:30 ✓ Given' : 'Mark given';
+  pmManualBtn.disabled = pmSnapToday.exists();
+  pmManualBtn.textContent = pmSnapToday.exists() ? '17:30 ✓ Given' : 'Mark given';
+}
+
+/* On load */
+(async function() {
+  // If page was opened with action=log, handled earlier in handleAutoLog() IIFE.
+  // Otherwise show UI or PIN prompt depending on cache
+  if (!qs('action')) {
+    await showAppIfUnlocked();
+    showShortcutExample();
+  }
+})();
 </script>
 </body>
 </html>
