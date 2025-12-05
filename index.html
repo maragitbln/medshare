@@ -210,14 +210,13 @@ function makeShortcutUrl(params) {
   return u.toString();
 }
 
-/* Secure writer (never stores the secret) */
+/* Secure writer (never leaves secret stored): two-step + deleteField */
 async function secureWrite(ref, data) {
-  const payload = { ...data, writeSecret: WRITE_SECRET };
+  // Step 1: write the payload INCLUDING the secret (required by rules to accept the create)
+  const payloadWithSecret = { ...data, writeSecret: WRITE_SECRET };
+  await setDoc(ref, payloadWithSecret, { merge: true });
 
-  // Write with secret included
-  await setDoc(ref, payload, { merge: true });
-
-  // Immediately remove writeSecret from stored document
+  // Step 2: immediately remove the secret field (requires rules to allow update when resource has secret)
   await setDoc(ref, { writeSecret: deleteField() }, { merge: true });
 }
 
@@ -265,7 +264,7 @@ async function handleAutoLog() {
   return true;
 }
 
-/* PIN cache */
+/* PIN cache helpers */
 function isUnlocked() {
   try {
     const entry = JSON.parse(localStorage.getItem('medshare_unlocked') || 'null');
