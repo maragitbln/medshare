@@ -3,420 +3,134 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="MedShare">
-  <link rel="apple-touch-icon" href="icon.png">
-
-  
-  <title>MedShare — Given Tracker</title>
-
-<!-- Home-screen icon (place icon.png beside index.html in repo) -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="MedShare">
 <link rel="apple-touch-icon" href="icon.png">
-
+<title>MedShare — Given Tracker</title>
 <style>
-  :root{
-    --bg:#071126; --card:#0b1220; --muted:#9aa6b2; --accent:#6ee7b7; --danger:#f87171; --glass: rgba(255,255,255,0.03);
-  }
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:#e6eef6;background:linear-gradient(180deg,#071126 0%,#0b1220 100%);}
+  :root{--bg:#071126;--card:#0b1220;--muted:#9aa6b2;--accent:#6ee7b7;--danger:#f87171;--glass:rgba(255,255,255,0.03)}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui;color:#e6eef6;background:linear-gradient(180deg,#071126,#0b1220)}
   .wrap{max-width:820px;margin:12px auto;padding:14px}
   header{display:flex;align-items:center;gap:12px}
   .logo{width:56px;height:56px;background:linear-gradient(135deg,#22c1c3,#6ee7b7);border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#04202a}
   h1{margin:0;font-size:20px}
   p.lead{margin:4px 0 14px;color:var(--muted)}
   .grid{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-top:12px}
-  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:12px;border-radius:12px;box-shadow:0 8px 24px rgba(2,6,23,0.6)}
+  .card{background:rgba(255,255,255,0.02);padding:12px;border-radius:12px;box-shadow:0 8px 24px rgba(2,6,23,0.6)}
   .small{font-size:13px;color:var(--muted)}
   .row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--glass)}
   .time{font-weight:700}
   .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;color:var(--accent);cursor:pointer}
+  .btn.active{background:linear-gradient(90deg,#22c1c3,#6ee7b7);color:#04202a;border:none}
   .btn-primary{background:linear-gradient(90deg,#22c1c3,#6ee7b7);color:#04202a;border:none;padding:10px 16px;border-radius:12px;cursor:pointer}
   .danger{background:var(--danger);color:#111;border:none;padding:10px 12px;border-radius:10px}
   input,select{padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
   .history{margin-top:12px}
   .day{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,0.02)}
-  .circles{display:flex;gap:8px;align-items:center}
-  /* single circle per day (empty / half / full) */
-  .circle{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,0.06);background:transparent;position:relative;overflow:hidden}
-  .circle.half::before{content:'';position:absolute;left:0;top:50%;width:100%;height:50%;background:linear-gradient(90deg,#6ee7b7,#22c1c3)}
+  .circle{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,0.06);position:relative;overflow:hidden}
+  .circle.half::before{content:"";position:absolute;left:0;top:50%;width:100%;height:50%;background:linear-gradient(90deg,#6ee7b7,#22c1c3)}
   .circle.full{background:linear-gradient(90deg,#22c1c3,#6ee7b7);border-color:transparent}
   .section-title{font-size:16px;margin-top:18px;margin-bottom:8px;color:var(--muted)}
   footer{margin-top:14px;color:var(--muted);font-size:13px;text-align:center}
-  .muted{color:var(--muted)}
   .hidden{display:none}
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="logo">MS</div>
-      <div>
-        <h1>MedShare</h1>
-        <p class="lead">Shared medication tracker — quick logging from Shortcuts</p>
-      </div>
-    </header>
-
-    <!-- PIN prompt (cached unlock) -->
-    <div id="pinCard" class="card" style="margin-top:12px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div>
-          <div style="font-weight:700">Unlock MedShare</div>
-          <div class="small muted">Enter PIN to see dashboard. Add to Home Screen to avoid repeated PIN entry.</div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input id="pinInput" type="password" placeholder="PIN" style="width:120px" />
-          <button id="pinBtn" class="btn-primary">Unlock</button>
-        </div>
-      </div>
-      <div id="pinMsg" class="small muted" style="margin-top:8px;"></div>
+<div class="wrap">
+<header>
+  <div class="logo">MS</div>
+  <div>
+    <h1>MedShare</h1>
+    <p class="lead">Shared medication tracker — quick logging from Shortcuts</p>
+  </div>
+</header>
+<div id="pinCard" class="card" style="margin-top:12px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="font-weight:700">Unlock MedShare</div>
+      <div class="small">Enter PIN to see dashboard. Add to Home Screen to stay unlocked.</div>
     </div>
-
-    <!-- Main UI -->
-    <div id="appUI" class="hidden">
-      <div class="grid">
-        <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <div style="font-weight:700">Today's schedule</div>
-              <div class="small muted">Standard times: 06:30 and 17:30</div>
-            </div>
-            <div style="text-align:right">
-              <div class="small muted">Last given</div>
-              <div id="lastGiven" class="small muted">—</div>
-            </div>
-          </div>
-
-          <div style="margin-top:12px" class="row">
-            <div>
-              <div class="time">06:30</div>
-              <div class="small muted">Aspirin</div>
-            </div>
-            <div id="btnSlotAM">
-              <button class="btn" id="amManualBtn">Mark given</button>
-            </div>
-          </div>
-
-          <div class="row">
-            <div>
-              <div class="time">17:30</div>
-              <div class="small muted">Aspirin</div>
-            </div>
-            <div id="btnSlotPM">
-              <button class="btn" id="pmManualBtn">Mark given</button>
-            </div>
-          </div>
-
-          <div class="history">
-            <div class="section-title">Past 7 days</div>
-            <div id="weekHistory"></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <div>
-              <div style="font-weight:700">Manual quick log</div>
-              <div class="small muted">Useful when logging a different user or medicine</div>
-            </div>
-
-            <input id="manualUser" placeholder="Name (e.g. Bart)" value="Bart">
-            <input id="manualMed" placeholder="Medicine (e.g. Aspirin)" value="Aspirin" style="margin-top:8px">
-            <select id="manualTime" style="margin-top:8px">
-              <option value="06:30">06:30</option>
-              <option value="17:30">17:30</option>
-            </select>
-
-            <button id="manualLogBtn" class="btn-primary" style="margin-top:8px">Log manual</button>
-
-            <hr style="opacity:0.06;margin:12px 0">
-
-            <div>
-              <div style="font-weight:700">Danger zone</div>
-              <div class="small muted">Sets all day counts to zero (keeps documents intact)</div>
-            </div>
-            <button id="clearBtn" class="danger">Clear all logs (reset counts)</button>
-
-            <div style="margin-top:12px" class="small muted">
-              <div>Shortcut logging URL (embed PIN):</div>
-              <code id="shortcutExample" style="font-size:12px;display:block;word-break:break-all;margin-top:6px"></code>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <footer>
-        <div class="small muted">Tip: Add to Home Screen to keep the dashboard unlocked (local cache). Shortcut calls include PIN to auto-log.</div>
-      </footer>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input id="pinInput" type="password" placeholder="PIN" style="width:120px" />
+      <button id="pinBtn" class="btn-primary">Unlock</button>
     </div>
   </div>
-
+  <div id="pinMsg" class="small" style="margin-top:8px;"></div>
+</div>
+<div id="appUI" class="hidden">
+  <div class="grid">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:700">Today's schedule</div>
+          <div class="small">Standard times: 06:30 and 17:30</div>
+        </div>
+        <div style="text-align:right">
+          <div class="small">Last given</div>
+          <div id="lastGiven" class="small">—</div>
+        </div>
+      </div>
+      <div style="margin-top:12px" class="row">
+        <div>
+          <div class="time">06:30</div>
+          <div class="small">Aspirin</div>
+        </div>
+        <button class="btn" id="amBtn">Given</button>
+      </div>
+      <div class="row">
+        <div>
+          <div class="time">17:30</div>
+          <div class="small">Aspirin</div>
+        </div>
+        <button class="btn" id="pmBtn">Given</button>
+      </div>
+      <div class="history">
+        <div class="section-title">Past 7 days</div>
+        <div id="weekHistory"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div>
+          <div style="font-weight:700">Manual quick log</div>
+        </div>
+        <input id="manualUser" value="Bart">
+        <input id="manualMed" value="Aspirin">
+        <select id="manualTime">
+          <option value="06:30">06:30</option>
+          <option value="17:30">17:30</option>
+        </select>
+        <button id="manualLogBtn" class="btn-primary">Log manual</button>
+        <hr style="opacity:0.06;margin:12px 0">
+        <div>
+          <div style="font-weight:700">Danger zone</div>
+        </div>
+        <button id="clearBtn" class="danger">Clear all</button>
+        <div class="small" id="shortcutExample"></div>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="small">Add to Home Screen to keep dashboard unlocked.</div>
+  </footer>
+</div>
+</div>
 <script type="module">
-/* ----------------------
-   CONFIG - edit these
-   ---------------------- */
-const SECRET_PIN = "12psab92";        // change to your PIN
-const WRITE_SECRET = "2430sdfnjh349skhf9"; // change to a long random string and keep it private
-const UNLOCK_DURATION_MS = 7 * 24 * 3600 * 1000; // 7 days cache
-
-/* Firebase config - supplied and corrected */
-const firebaseConfig = {
-  apiKey: "AIzaSyB09h7xfQXCCXu_TjZkG7Ro59HFzQtrW8c",
-  authDomain: "medtrack-9b220.firebaseapp.com",
-  projectId: "medtrack-9b220",
-  storageBucket: "medtrack-9b220.appspot.com",
-  messagingSenderId: "419299696230",
-  appId: "1:419299696230:web:509ed433ac9a391b4797a7"
-};
-/* ----------------------
-   End config
-   ---------------------- */
-
-/* Firebase v10 modular imports (CDN) */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-import {
-  getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs
-} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-/* Helpers */
-const qs = k => new URLSearchParams(location.search).get(k);
-const nowDateKey = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-};
-const docIdFor = (dateKey) => `${dateKey}`; // we store one doc per date: doc id = 'YYYY-MM-DD'
-const todayDocRef = () => doc(db, "pillLog", docIdFor(nowDateKey()));
-
-/* Elements */
-const pinCard = document.getElementById('pinCard');
-const pinInput = document.getElementById('pinInput');
-const pinBtn = document.getElementById('pinBtn');
-const pinMsg = document.getElementById('pinMsg');
-
-const appUI = document.getElementById('appUI');
-const amManualBtn = document.getElementById('amManualBtn');
-const pmManualBtn = document.getElementById('pmManualBtn');
-const lastGiven = document.getElementById('lastGiven');
-const weekHistory = document.getElementById('weekHistory');
-const manualUser = document.getElementById('manualUser');
-const manualMed = document.getElementById('manualMed');
-const manualTime = document.getElementById('manualTime');
-const manualLogBtn = document.getElementById('manualLogBtn');
-const clearBtn = document.getElementById('clearBtn');
-const shortcutExample = document.getElementById('shortcutExample');
-
-/* Shortcut URL helper (for user convenience) */
-function makeShortcutUrl(params) {
-  const u = new URL(location.href);
-  u.search = ""; // clear existing
-  Object.keys(params).forEach(k => u.searchParams.set(k, params[k]));
-  return u.toString();
-}
-
-/* Auto-log handler (shortcut) : action=log&pin=...&time=06:30&user=Bart&med=Aspirin */
-(async function handleAutoLog() {
-  const action = qs('action');
-  if (action !== 'log') return;
-
-  const pin = qs('pin') || '';
-  const time = qs('time') || '';
-  const user = qs('user') || 'Bart';
-  const med = qs('med') || 'Aspirin';
-
-  // validate pin quickly
-  if (pin !== SECRET_PIN) {
-    document.body.innerHTML = `<div style="padding:30px;color:#fff;"><h2 style="color:#f33">Auth failed</h2><p style="color:#ddd">Invalid PIN in shortcut URL.</p></div>`;
-    return;
-  }
-  if (!time) {
-    document.body.innerHTML = `<div style="padding:30px;color:#fff;"><h2 style="color:#f33">Missing time</h2></div>`;
-    return;
-  }
-
-  // Fetch today's doc
-  const dateKey = nowDateKey();
-  const ref = doc(db, "pillLog", docIdFor(dateKey));
-  const snap = await getDoc(ref);
-
-  // If exists, check count and avoid double increment beyond 2
-  let count = 0;
-  if (snap.exists()) count = snap.data().count || 0;
-
-  // If this time slot already logged today (we can't easily check per-slot), we use count semantics:
-  // For simplicity: increment count up to 2. This keeps the same "empty/half/full" visual semantics.
-  if (count >= 2) {
-    document.body.innerHTML = `<div style="padding:30px;color:#fff;background:#071126;height:100vh;display:flex;align-items:center"><div style="max-width:600px;text-align:center"><h2 style="color:#6ee7b7">Already given</h2><p style="color:#cfe">This day's doses already recorded.</p></div></div>`;
-    return;
-  }
-
-  const newCount = Math.min(count + 1, 2);
-  const lastTs = new Date().toISOString();
-  await setDoc(ref, {
-    count: newCount,
-    lastUser: user,
-    lastMed: med,
-    lastTs: lastTs,
-    secret: WRITE_SECRET
-  }, { merge: true });
-
-  document.body.innerHTML = `<div style="padding:30px;color:#071126;background:#6ee7b7;height:100vh;display:flex;align-items:center"><div style="max-width:600px;text-align:center"><h2 style="color:#022">Logged ✓</h2><p style="color:#022">${med} for ${user} at ${time} recorded.</p></div></div>`;
-  return;
-})();
-
-/* PIN caching helpers */
-function isUnlocked() {
-  try {
-    const entry = JSON.parse(localStorage.getItem('medshare_unlocked') || 'null');
-    if (!entry) return false;
-    return Date.now() < entry.expiry;
-  } catch (e) { return false; }
-}
-function setUnlocked() {
-  localStorage.setItem('medshare_unlocked', JSON.stringify({ expiry: Date.now() + UNLOCK_DURATION_MS }));
-}
-
-/* Show app if unlocked */
-async function showAppIfCached() {
-  if (isUnlocked()) {
-    pinCard.classList.add('hidden');
-    appUI.classList.remove('hidden');
-    await startAppUI();
-  } else {
-    pinCard.classList.remove('hidden');
-    appUI.classList.add('hidden');
-  }
-}
-
-/* bind PIN button */
-pinBtn.addEventListener('click', async () => {
-  const val = pinInput.value;
-  if (val === SECRET_PIN) {
-    setUnlocked();
-    pinCard.classList.add('hidden');
-    appUI.classList.remove('hidden');
-    await startAppUI();
-  } else {
-    pinMsg.textContent = 'Incorrect PIN';
-    pinInput.value = '';
-  }
-});
-
-/* Shortcut example show */
-function showShortcutExample() {
-  // sample link for 06:30; user can edit for 17:30
-  const u = makeShortcutUrl({ action:'log', pin: SECRET_PIN, time:'06:30', user:'Bart', med:'Aspirin' });
-  shortcutExample.textContent = u;
-}
-
-/* Main UI wiring / start */
-let uiStarted = false;
-async function startAppUI() {
-  if (uiStarted) return;
-  uiStarted = true;
-
-  // wire buttons
-  amManualBtn.addEventListener('click', async () => {
-    await incrementTodayCount('Bart','Aspirin');
-    await refreshUI();
-  });
-  pmManualBtn.addEventListener('click', async () => {
-    await incrementTodayCount('Bart','Aspirin');
-    await refreshUI();
-  });
-
-  manualLogBtn.addEventListener('click', async () => {
-    const user = manualUser.value || 'Bart';
-    const med = manualMed.value || 'Aspirin';
-    const time = manualTime.value;
-    await incrementTodayCount(user, med);
-    await refreshUI();
-  });
-
-  clearBtn.addEventListener('click', async () => {
-    if (!confirm('Reset all day counts to zero?')) return;
-    // set count=0 for all docs (no deletes to satisfy Firestore rules)
-    const colSnap = await getDocs(collection(db, 'pillLog'));
-    for (const d of colSnap.docs) {
-      await setDoc(doc(db, 'pillLog', d.id), { count: 0, lastUser: '', lastMed: '', lastTs:'', secret: WRITE_SECRET }, { merge: true });
-    }
-    await refreshUI();
-  });
-
-  showShortcutExample();
-  await refreshUI();
-}
-
-/* increment today's count (safely) */
-async function incrementTodayCount(user, med) {
-  const dateKey = nowDateKey();
-  const ref = doc(db, 'pillLog', docIdFor(dateKey));
-  const snap = await getDoc(ref);
-  const count = snap.exists() ? (snap.data().count || 0) : 0;
-  const newCount = Math.min(count + 1, 2);
-  const ts = new Date().toISOString();
-  await setDoc(ref, {
-    count: newCount,
-    lastUser: user,
-    lastMed: med,
-    lastTs: ts,
-    secret: WRITE_SECRET
-  }, { merge: true });
-}
-
-/* Refresh UI: week overview + today buttons + last given */
-async function refreshUI() {
-  // last given
-  const colSnap = await getDocs(collection(db, 'pillLog'));
-  let last = null;
-  colSnap.forEach(d => {
-    const data = d.data();
-    if (data.lastTs) {
-      if (!last || new Date(data.lastTs) > new Date(last.lastTs)) last = { lastTs: data.lastTs, lastUser: data.lastUser, lastMed: data.lastMed };
-    }
-  });
-  lastGiven.textContent = last ? `${last.lastUser} · ${new Date(last.lastTs).toLocaleString()}` : '—';
-
-  // week history
-  weekHistory.innerHTML = '';
-  const now = new Date();
-  for (let i=0;i<7;i++) {
-    const d = new Date(now);
-    d.setDate(now.getDate() - i);
-    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const snap = await getDoc(doc(db,'pillLog', docIdFor(key)));
-    const count = snap.exists() ? (snap.data().count || 0) : 0;
-
-    const row = document.createElement('div');
-    row.className = 'day';
-    const left = document.createElement('div');
-    left.textContent = `${key}`;
-    const circle = document.createElement('div');
-    circle.className = 'circle ' + (count === 1 ? 'half' : (count >= 2 ? 'full' : ''));
-    row.appendChild(left);
-    row.appendChild(circle);
-    weekHistory.appendChild(row);
-  }
-
-  // update today's buttons
-  const todaySnap = await getDoc(todayDocRef());
-  const todayCount = todaySnap.exists() ? (todaySnap.data().count || 0) : 0;
-  amManualBtn.disabled = todayCount >= 2;
-  pmManualBtn.disabled = todayCount >= 2;
-  amManualBtn.textContent = todayCount >= 1 ? '06:30 ✓ Given' : 'Mark given';
-  pmManualBtn.textContent = todayCount >= 2 ? '17:30 ✓ Given' : 'Mark given';
-}
-
-/* Initialization on page load */
-(async function onLoad() {
-  // If the page was used as a shortcut with ?action=log it was handled earlier by the IIFE.
-  // For normal page loads, show cached unlock or PIN.
-  if (!qs('action')) {
-    await showAppIfCached();
-    showShortcutExample();
-  }
-})();
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+const SECRET_PIN="12psab92";const WRITE_SECRET="2430sdfnjh349skhf9";const UNLOCK_DURATION_MS=7*24*3600*1000;
+const firebaseConfig={apiKey:"AIzaSyB09h7xfQXCCXu_TjZkG7Ro59HFzQtrW8c",authDomain:"medtrack-9b220.firebaseapp.com",projectId:"medtrack-9b220",storageBucket:"medtrack-9b220.appspot.com",messagingSenderId:"419299696230",appId:"1:419299696230:web:509ed433ac9a391b4797a7"};
+const app=initializeApp(firebaseConfig);const db=getFirestore(app);
+const pinCard=document.getElementById("pinCard");const appUI=document.getElementById("appUI");
+function todayKey(){return new Date().toISOString().slice(0,10)}
+async function loadToday(){const ref=doc(db,"days",todayKey());const snap=await getDoc(ref);return snap.exists()?snap.data():{amGiven:false,pmGiven:false}}
+function renderButtons(state){document.getElementById("amBtn").classList.toggle("active",state.amGiven);document.getElementById("pmBtn").classList.toggle("active",state.pmGiven)}
+async function toggleSlot(slot){const ref=doc(db,"days",todayKey());const data=await loadToday();data[slot]=!data[slot];data.count=(data.amGiven?1:0)+(data.pmGiven?1:0);await setDoc(ref,data);renderButtons(data);renderWeek()}
+document.getElementById("amBtn").onclick=()=>toggleSlot("amGiven");document.getElementById("pmBtn").onclick=()=>toggleSlot("pmGiven");
+document.getElementById("pinBtn").onclick=()=>{const val=document.getElementById("pinInput").value;if(val===SECRET_PIN){pinCard.classList.add("hidden");appUI.classList.remove("hidden");localStorage.setItem("ms_unlocked",Date.now());loadToday().then(renderButtons).then(renderWeek);}else document.getElementById("pinMsg").textContent="Wrong PIN"};
+function checkUnlock(){const t=localStorage.getItem("ms_unlocked");if(t&&Date.now()-Number(t)<UNLOCK_DURATION_MS){pinCard.classList.add("hidden");appUI.classList.remove("hidden");loadToday().then(renderButtons).then(renderWeek)}}checkUnlock();
+async function renderWeek(){const wrap=document.getElementById("weekHistory"),days=[];wrap.innerHTML="";for(let i=6;i>=0;i--){const d=new Date(Date.now()-i*86400000).toISOString().slice(0,10);const snap=await getDoc(doc(db,"days",d));let count=0;if(snap.exists()){const x=snap.data();count=(x.amGiven?1:0)+(x.pmGiven?1:0)}const div=document.createElement("div");div.className="day";const c=document.createElement("div");c.className="circle";(count===1)&&(c.classList.add("half"));(count===2)&&(c.classList.add("full"));div.innerHTML=`${d}`;div.appendChild(c);wrap.appendChild(div)}}
 </script>
 </body>
 </html>
