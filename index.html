@@ -153,7 +153,6 @@
 const SECRET_PIN = "12psab92";        // change to your PIN
 const WRITE_SECRET = "2430sdfnjh349skhf9"; // change to a long random string and keep it private
 const UNLOCK_DURATION_MS = 7 * 24 * 3600 * 1000; // 7 days cache
-
 /* Firebase config (your project) */
 const firebaseConfig = {
   apiKey: "AIzaSyB09h7xfQXCCXu_TjZkG7Ro59HFzQtrW8c",
@@ -171,10 +170,10 @@ const firebaseConfig = {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
 import {
   getFirestore,
+  collection,
   doc,
   getDoc,
   setDoc,
-  collection,
   getDocs
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
@@ -215,9 +214,9 @@ function makeShortcutUrl(params) {
 }
 
 /* Auto-log handler (shortcut) : action=log&pin=...&time=06:30&user=Bart&med=Aspirin */
-(async function handleAutoLog() {
+async function handleAutoLog() {
   const action = qs('action');
-  if (action !== 'log') return;
+  if (action !== 'log') return false; // not handled here
 
   const pin = qs('pin') || '';
   const time = qs('time') || '';
@@ -227,11 +226,11 @@ function makeShortcutUrl(params) {
   // quick PIN check
   if (pin !== SECRET_PIN) {
     document.body.innerHTML = `<div style="padding:30px;color:#fff;"><h2 style="color:#f33">Auth failed</h2><p style="color:#ddd">Invalid PIN in shortcut URL.</p></div>`;
-    return;
+    return true; // handled (but failed)
   }
   if (!time) {
     document.body.innerHTML = `<div style="padding:30px;color:#fff;"><h2 style="color:#f33">Missing time</h2></div>`;
-    return;
+    return true;
   }
 
   // set the specific slot (AM or PM) to true on today's doc
@@ -279,8 +278,8 @@ function makeShortcutUrl(params) {
   }, { merge: true });
 
   document.body.innerHTML = `<div style="padding:30px;color:#071126;background:#6ee7b7;height:100vh;display:flex;align-items:center;justify-content:center"><div style="max-width:600px;text-align:center"><h2 style="color:#022">Logged ✓</h2><p style="color:#022">${med} for ${user} at ${time} recorded.</p></div></div>`;
-  return;
-})();
+  return true;
+}
 
 /* PIN caching helpers */
 function isUnlocked() {
@@ -511,12 +510,17 @@ async function refreshUI() {
 }
 
 /* Initialization on page load */
-(async function onLoad() {
-  if (!qs('action')) {
-    await showAppIfCached();
-    showShortcutExample();
-  }
-})();
+async function onLoad() {
+  // First: handle shortcut auto-log if present. If it returns true it handled the request (and replaced body),
+  // so we should not continue to show the PIN UI.
+  const handled = await handleAutoLog();
+  if (handled) return;
+
+  // Otherwise show cached unlock or PIN
+  await showAppIfCached();
+  showShortcutExample();
+}
+onLoad();
 </script>
 </body>
 </html>
