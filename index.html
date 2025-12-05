@@ -1,273 +1,459 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MedTrack</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="MedShare">
+  <link rel="apple-touch-icon" href="icon.png">
+  <title>MedShare — Given Tracker</title>
 
-<style>
-/* ---- RESET ---- */
-body {
-  margin: 0;
-  padding: 0;
-  background: #f6f7f9;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
-    "Helvetica Neue", Arial, sans-serif;
-  color: #222;
-}
-
-/* ---- CONTAINER ---- */
-#app {
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 20px;
-  text-align: center;
-}
-
-/* ---- HEADER ---- */
-h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 10px;
-}
-.subtitle {
-  font-size: 1.1rem;
-  margin-bottom: 25px;
-}
-
-/* ---- GRID ---- */
-.week-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  column-gap: 10px;
-  margin-top: 20px;
-}
-
-/* ---- CIRCLES ---- */
-.circle {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 3px solid #888;
-  margin: 0 auto;
-  position: relative;
-  overflow: hidden;
-}
-.empty {
-  background: transparent;
-}
-.half::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 50%;
-  background: #4caf50;
-}
-.full {
-  background: #4caf50;
-}
-
-/* ---- BUTTONS ---- */
-.action-btn {
-  margin-top: 25px;
-  padding: 14px 20px;
-  background: #007aff;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-.action-btn:active {
-  background: #0055cc;
-}
-
-/* ---- LOGIN SCREEN ---- */
-#lockScreen {
-  display: none;
-  padding: 40px;
-}
-#pinInput {
-  font-size: 1.4rem;
-  padding: 12px;
-  width: 180px;
-  margin: 20px auto;
-  text-align: center;
-  border-radius: 12px;
-  border: 2px solid #ccc;
-}
-#unlockBtn {
-  padding: 13px 22px;
-  font-size: 1.2rem;
-  background: #007aff;
-  color: white;
-  border: none;
-  border-radius: 12px;
-}
-#unlockBtn:active {
-  background: #0055cc;
-}
-
-/* ---- ICON ---- */
-#appIcon {
-  width: 110px;
-  margin: 20px auto;
-  display: block;
-}
-</style>
+  <style>
+    :root{
+      --bg:#071126; --card:#0b1220; --muted:#9aa6b2; --accent:#6ee7b7; --danger:#f87171; --glass: rgba(255,255,255,0.03);
+    }
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:#e6eef6;background:linear-gradient(180deg,#071126 0%,#0b1220 100%);}
+    .wrap{max-width:820px;margin:12px auto;padding:14px}
+    header{display:flex;align-items:center;gap:12px}
+    .logo{width:56px;height:56px;background:linear-gradient(135deg,#22c1c3,#6ee7b7);border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#04202a}
+    h1{margin:0;font-size:20px}
+    p.lead{margin:4px 0 14px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-top:12px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:12px;border-radius:12px;box-shadow:0 8px 24px rgba(2,6,23,0.6)}
+    .small{font-size:13px;color:var(--muted)}
+    .row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--glass)}
+    .time{font-weight:700}
+    .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;color:var(--accent);cursor:pointer}
+    .btn.active{background:linear-gradient(90deg,#22c1c3,#6ee7b7);color:#04202a;border:none}
+    .btn-primary{background:linear-gradient(90deg,#22c1c3,#6ee7b7);color:#04202a;border:none;padding:10px 16px;border-radius:12px;cursor:pointer}
+    .danger{background:var(--danger);color:#111;border:none;padding:10px 12px;border-radius:10px}
+    input,select{padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    .history{margin-top:12px}
+    .day{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,0.02)}
+    .circles{display:flex;gap:8px;align-items:center}
+    .circle{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,0.06);background:transparent;position:relative;overflow:hidden}
+    .circle.half::before{content:'';position:absolute;left:0;top:50%;width:100%;height:50%;background:linear-gradient(90deg,#6ee7b7,#22c1c3)}
+    .circle.full{background:linear-gradient(90deg,#22c1c3,#6ee7b7);border-color:transparent}
+    .section-title{font-size:16px;margin-top:18px;margin-bottom:8px;color:var(--muted)}
+    footer{margin-top:14px;color:var(--muted);font-size:13px;text-align:center}
+    .muted{color:var(--muted)}
+    .hidden{display:none}
+  </style>
 </head>
-
 <body>
+  <div class="wrap">
+    <header>
+      <div class="logo">MS</div>
+      <div>
+        <h1>MedShare</h1>
+        <p class="lead">Shared medication tracker — quick logging from Shortcuts</p>
+      </div>
+    </header>
 
-<div id="lockScreen">
-  <h1>MedTrack</h1>
-  <img id="appIcon" src="cap_icon.png" alt="icon" />
-  <p>Enter secret:</p>
-  <input id="pinInput" type="password" />
-  <br />
-  <button id="unlockBtn">Unlock</button>
-</div>
+    <!-- PIN prompt -->
+    <div id="pinCard" class="card" style="margin-top:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-weight:700">Unlock MedShare</div>
+          <div class="small muted">Enter PIN to see dashboard. Add to Home Screen for cached unlock.</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="pinInput" type="password" placeholder="PIN" style="width:120px" />
+          <button id="pinBtn" class="btn-primary">Unlock</button>
+        </div>
+      </div>
+      <div id="pinMsg" class="small muted" style="margin-top:8px;"></div>
+    </div>
 
-<div id="app" style="display:none;">
-  <h1>MedTrack</h1>
-  <div class="subtitle" id="subtitleText"></div>
+    <!-- Main UI -->
+    <div id="appUI" class="hidden">
+      <div class="grid">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-weight:700">Today's schedule</div>
+              <div class="small muted">Standard times: 06:30 and 17:30</div>
+            </div>
+            <div style="text-align:right">
+              <div class="small muted">Last given</div>
+              <div id="lastGiven" class="small muted">—</div>
+            </div>
+          </div>
 
-  <div class="week-grid" id="weekGrid"></div>
+          <div style="margin-top:12px" class="row">
+            <div>
+              <div class="time">06:30</div>
+              <div class="small muted">LamBri</div>
+            </div>
+            <div id="btnSlotAM">
+              <button class="btn" id="amManualBtn">Mark given</button>
+            </div>
+          </div>
 
-  <button class="action-btn" id="giveBtn">Mark Given</button>
-</div>
+          <div class="row">
+            <div>
+              <div class="time">17:30</div>
+              <div class="small muted">LamBri</div>
+            </div>
+            <div id="btnSlotPM">
+              <button class="btn" id="pmManualBtn">Mark given</button>
+            </div>
+          </div>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js"></script>
+          <div class="history">
+            <div class="section-title">Past 7 days</div>
+            <div id="weekHistory"></div>
+          </div>
+        </div>
 
-<script>
-/* -----------------------------------------------------
+        <div class="card">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div>
+              <div style="font-weight:700">Manual log</div>
+              <div class="small muted">For logging a different user or medicine</div>
+            </div>
+
+            <input id="manualUser" placeholder="Name (e.g. Bart)" value="Bart">
+            <input id="manualMed" placeholder="Medicine (e.g. LamBri)" value="LamBri" style="margin-top:8px">
+            <select id="manualTime" style="margin-top:8px">
+              <option value="06:30">06:30</option>
+              <option value="17:30">17:30</option>
+            </select>
+
+            <button id="manualLogBtn" class="btn-primary" style="margin-top:8px">Log manual</button>
+
+            <hr style="opacity:0.06;margin:12px 0">
+
+            <div>
+              <div style="font-weight:700">Danger zone</div>
+              <div class="small muted">Resets all day counts (documents remain)</div>
+            </div>
+            <button id="clearBtn" class="danger">Clear all logs</button>
+
+            <div style="margin-top:12px" class="small muted">
+              <div>Shortcut URL (auto PIN):</div>
+              <code id="shortcutExample" style="font-size:12px;display:block;word-break:break-all;margin-top:6px"></code>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="small muted">Tip: Add to Home Screen to stay unlocked.</div>
+      </footer>
+    </div>
+  </div>
+
+<script type="module">
+/* ----------------------
    CONFIG
------------------------------------------------------ */
+   ---------------------- */
+const SECRET_PIN = "12psab92";
+const WRITE_SECRET = "ads39akmd9823j";
+const UNLOCK_DURATION_MS = 7 * 24 * 3600 * 1000;
+
 const firebaseConfig = {
   apiKey: "AIzaSyB09h7xfQXCCXu_TjZkG7Ro59HFzQtrW8c",
   authDomain: "medtrack-9b220.firebaseapp.com",
-  databaseURL: "https://medtrack-9b220-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "medtrack-9b220",
-  storageBucket: "medtrack-9b220.firebasestorage.app",
+  storageBucket: "medtrack-9b220.appspot.com",
   messagingSenderId: "419299696230",
   appId: "1:419299696230:web:509ed433ac9a391b4797a7"
 };
 
-const SECRET = "hf82ja.aig93we92";   // <-- CHANGE THIS
-const CHILD_NAME = "Bart";
-const MED_NAME = "LamBri";
+/* Firebase imports */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  doc,
+  getDoc,
+  setDoc,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
-/* -----------------------------------------------------
-   INIT
------------------------------------------------------ */
-const appFB = firebase.initializeApp(firebaseConfig);
-const db = firebase.getDatabase(appFB);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-const qs = new URLSearchParams(location.search);
-const urlSecret = qs.get("secret");
+/* Helpers */
+const qs = k => new URLSearchParams(location.search).get(k);
+const nowDateKey = (d = new Date()) =>
+  `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 
-/* Auto-login if secret provided in URL */
-if (urlSecret === SECRET) {
-  showApp();
-} else {
-  document.getElementById("lockScreen").style.display = "block";
+const todayDocRef = () => doc(db, "pillLog", nowDateKey());
+
+/* DOM elements */
+const pinCard = document.getElementById('pinCard');
+const pinInput = document.getElementById('pinInput');
+const pinBtn = document.getElementById('pinBtn');
+const pinMsg = document.getElementById('pinMsg');
+const appUI = document.getElementById('appUI');
+
+const amManualBtn = document.getElementById('amManualBtn');
+const pmManualBtn = document.getElementById('pmManualBtn');
+const lastGiven = document.getElementById('lastGiven');
+const weekHistory = document.getElementById('weekHistory');
+const manualUser = document.getElementById('manualUser');
+const manualMed = document.getElementById('manualMed');
+const manualTime = document.getElementById('manualTime');
+const manualLogBtn = document.getElementById('manualLogBtn');
+const clearBtn = document.getElementById('clearBtn');
+const shortcutExample = document.getElementById('shortcutExample');
+
+/* Build URL for Shortcuts */
+function makeShortcutUrl(params) {
+  const u = new URL(location.origin + location.pathname);
+  Object.keys(params).forEach(k => u.searchParams.set(k, params[k]));
+  return u.toString();
 }
 
-/* Manual unlock */
-document.getElementById("unlockBtn").onclick = () => {
-  const entered = document.getElementById("pinInput").value.trim();
-  if (entered === SECRET) {
-    showApp();
-  } else {
-    alert("Wrong secret.");
+/* Secure writer (never stores the secret) */
+async function secureWrite(ref, data) {
+  const payload = { ...data, writeSecret: WRITE_SECRET };
+
+  // Write with secret included
+  await setDoc(ref, payload, { merge: true });
+
+  // Immediately remove writeSecret from stored document
+  await setDoc(ref, { writeSecret: deleteField() }, { merge: true });
+}
+
+/* HANDLE AUTLOG (Shortcuts) */
+async function handleAutoLog() {
+  const action = qs('action');
+  if (action !== 'log') return false;
+
+  if (qs('pin') !== SECRET_PIN) {
+    document.body.innerHTML =
+      `<div style="padding:30px;color:#fff;"><h2 style="color:#f33">Auth failed</h2></div>`;
+    return true;
   }
-};
 
-/* -----------------------------------------------------
-   SHOW MAIN UI
------------------------------------------------------ */
-function showApp() {
-  document.getElementById("lockScreen").style.display = "none";
-  document.getElementById("app").style.display = "block";
-  loadWeek();
-}
+  const time = qs('time');
+  const user = qs('user') || 'Bart';
+  const med = qs('med') || 'LamBri';
 
-/* -----------------------------------------------------
-   DATE HELPERS
------------------------------------------------------ */
-function formatDate(d) {
-  return d.toISOString().split("T")[0];
-}
+  if (!time) return true;
 
-function getPast7Days() {
-  const base = new Date();
-  const out = [];
-  for (let i = 6; i >= 0; i--) {
-    let t = new Date(base);
-    t.setDate(t.getDate() - i);
-    out.push(formatDate(t));
-  }
-  return out;
-}
+  const ref = todayDocRef();
+  const snap = await getDoc(ref);
 
-/* -----------------------------------------------------
-   LOAD WEEK DATA
------------------------------------------------------ */
-async function loadWeek() {
-  document.getElementById("subtitleText").textContent =
-    `${CHILD_NAME} — ${MED_NAME}`;
-
-  const week = getPast7Days();
-  const grid = document.getElementById("weekGrid");
-  grid.innerHTML = "";
-
-  for (let day of week) {
-    const ref = firebase.ref(db, "days/" + day);
-    const snap = await firebase.get(ref);
-
-    let state = "empty";
-    if (snap.exists()) {
-      const v = snap.val().value || 0;
-      if (v === 1) state = "half";
-      if (v === 2) state = "full";
-    }
-
-    const cell = document.createElement("div");
-    cell.className = "circle " + state;
-    grid.appendChild(cell);
-  }
-}
-
-/* -----------------------------------------------------
-   MARK TODAY AS GIVEN
------------------------------------------------------ */
-document.getElementById("giveBtn").onclick = async () => {
-  const today = formatDate(new Date());
-  const ref = firebase.ref(db, "days/" + today);
-
-  // Read existing
-  const snap = await firebase.get(ref);
-  let prev = 0;
+  let amGiven = false, pmGiven = false;
   if (snap.exists()) {
-    prev = snap.val().value || 0;
+    const d = snap.data();
+    amGiven = !!d.amGiven;
+    pmGiven = !!d.pmGiven;
   }
 
-  // Cycle empty → half → full
-  let next = prev + 1;
-  if (next > 2) next = 2;
+  if (time === "06:30") amGiven = true;
+  else if (time === "17:30") pmGiven = true;
 
-  // Write with secret
-  await firebase.set(ref, {
-    value: next,
-    secret: SECRET
+  await secureWrite(ref, {
+    amGiven, pmGiven,
+    count: (amGiven?1:0)+(pmGiven?1:0),
+    lastUser: user,
+    lastMed: med,
+    lastTs: new Date().toISOString()
   });
 
-  loadWeek();
-};
+  document.body.innerHTML =
+    `<div style="padding:30px;color:#071126;background:#6ee7b7;height:100vh;display:flex;align-items:center;justify-content:center"><div style="max-width:600px;text-align:center"><h2 style="color:#022">Logged ✓</h2><p style="color:#022">${med} for ${user} at ${time} recorded.</p></div></div>`;
+
+  return true;
+}
+
+/* PIN cache */
+function isUnlocked() {
+  try {
+    const entry = JSON.parse(localStorage.getItem('medshare_unlocked') || 'null');
+    return entry && Date.now() < entry.expiry;
+  } catch { return false; }
+}
+
+function setUnlocked() {
+  localStorage.setItem('medshare_unlocked', JSON.stringify({
+    expiry: Date.now() + UNLOCK_DURATION_MS
+  }));
+}
+
+async function showAppIfCached() {
+  if (isUnlocked()) {
+    pinCard.classList.add('hidden');
+    appUI.classList.remove('hidden');
+    await startAppUI();
+  }
+}
+
+pinBtn.addEventListener('click', async () => {
+  if (pinInput.value === SECRET_PIN) {
+    setUnlocked();
+    pinCard.classList.add('hidden');
+    appUI.classList.remove('hidden');
+    await startAppUI();
+  } else {
+    pinMsg.textContent = "Incorrect PIN";
+    pinInput.value = "";
+  }
+});
+
+/* Display example URL */
+function showShortcutExample() {
+  shortcutExample.textContent = makeShortcutUrl({
+    action: 'log',
+    pin: SECRET_PIN,
+    time: '06:30',
+    user: 'Bart',
+    med: 'LamBri'
+  });
+}
+
+let uiStarted = false;
+
+async function startAppUI() {
+  if (uiStarted) return;
+  uiStarted = true;
+
+  amManualBtn.addEventListener('click', async () => {
+    await toggleSlot('amGiven');
+    await refreshUI();
+  });
+  pmManualBtn.addEventListener('click', async () => {
+    await toggleSlot('pmGiven');
+    await refreshUI();
+  });
+
+  manualLogBtn.addEventListener('click', async () => {
+    const user = manualUser.value || 'Bart';
+    const med = manualMed.value || 'LamBri';
+    const time = manualTime.value;
+
+    const ref = todayDocRef();
+    const snap = await getDoc(ref);
+
+    let amGiven = false, pmGiven = false;
+    if (snap.exists()) {
+      const d = snap.data();
+      amGiven = !!d.amGiven;
+      pmGiven = !!d.pmGiven;
+    }
+
+    if (time === "06:30") amGiven = true;
+    else pmGiven = true;
+
+    await secureWrite(ref, {
+      amGiven, pmGiven,
+      count: (amGiven?1:0)+(pmGiven?1:0),
+      lastUser: user,
+      lastMed: med,
+      lastTs: new Date().toISOString()
+    });
+
+    await refreshUI();
+  });
+
+  clearBtn.addEventListener('click', async () => {
+    if (!confirm("Reset all?")) return;
+
+    const col = await getDocs(collection(db, 'pillLog'));
+    for (const d of col.docs) {
+      await secureWrite(doc(db,'pillLog',d.id), {
+        amGiven: false, pmGiven: false, count: 0,
+        lastUser: "", lastMed: "", lastTs: ""
+      });
+    }
+    await refreshUI();
+  });
+
+  showShortcutExample();
+  await refreshUI();
+}
+
+/* Toggle AM/PM */
+async function toggleSlot(slot) {
+  const ref = todayDocRef();
+  const snap = await getDoc(ref);
+
+  let amGiven = false, pmGiven = false;
+  if (snap.exists()) {
+    amGiven = !!snap.data().amGiven;
+    pmGiven = !!snap.data().pmGiven;
+  }
+
+  if (slot === "amGiven") amGiven = !amGiven;
+  if (slot === "pmGiven") pmGiven = !pmGiven;
+
+  await secureWrite(ref, {
+    amGiven, pmGiven,
+    count: (amGiven?1:0)+(pmGiven?1:0),
+    lastUser: manualUser.value || 'Bart',
+    lastMed: manualMed.value || 'LamBri',
+    lastTs: new Date().toISOString()
+  });
+}
+
+/* Refresh UI */
+async function refreshUI() {
+  const col = await getDocs(collection(db,'pillLog'));
+
+  // last given
+  let latest = null;
+  col.forEach(d => {
+    const data = d.data();
+    if (data.lastTs && (!latest || data.lastTs > latest.lastTs)) {
+      latest = { id: d.id, ...data };
+    }
+  });
+
+  if (latest) {
+    lastGiven.textContent =
+      `${latest.lastMed} (${latest.lastUser}) on ${latest.id} at ${latest.lastTs.slice(11,16)}`;
+  } else {
+    lastGiven.textContent = "—";
+  }
+
+  // today buttons
+  const todaySnap = await getDoc(todayDocRef());
+  if (todaySnap.exists()) {
+    const d = todaySnap.data();
+    if (d.amGiven) amManualBtn.classList.add("active");
+    else amManualBtn.classList.remove("active");
+
+    if (d.pmGiven) pmManualBtn.classList.add("active");
+    else pmManualBtn.classList.remove("active");
+  }
+
+  // week view
+  const arr = [];
+  col.forEach(doc => {
+    arr.push({ id: doc.id, ...doc.data() });
+  });
+
+  arr.sort((a,b) => a.id.localeCompare(b.id));
+
+  const last7 = arr.slice(-7);
+  weekHistory.innerHTML = "";
+
+  last7.forEach(d => {
+    const c = d.count || 0;
+    let cls = "circle";
+    if (c === 1) cls += " half";
+    if (c >= 2) cls += " full";
+
+    weekHistory.innerHTML += `
+      <div class="day">
+        <div>${d.id}</div>
+        <div class="circles">
+          <div class="${cls}"></div>
+        </div>
+      </div>`;
+  });
+}
+
+(async () => {
+  if (await handleAutoLog()) return;
+  await showAppIfCached();
+})();
 </script>
 </body>
 </html>
